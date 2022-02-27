@@ -1,18 +1,19 @@
 <template>
   <div class='site'>
     <div class='header' >
-      <el-input v-model="form.coordinateX" placeholder="请输入X坐标" class="input-search" />
-      <el-input v-model="form.coordinateY" placeholder="请输入Y坐标" class="input-search" />
-      <el-button type='primary' @click="getData">搜索</el-button>
+      <el-input v-model.number="form.x" placeholder="请输入X坐标" class="input-search" />
+      <el-input v-model.number="form.y" placeholder="请输入Y坐标" class="input-search" />
+      <el-button type='primary' @click="lookData">搜索</el-button>
     </div>
     <div class='content'>
-      <el-table :data='tableData' stripe style='width: 100%'>
+      <el-table v-loading="loading" :data='tableData' stripe style='width: 100%'>
         <el-table-column prop='name' label='地块名' width='180'>
         </el-table-column>
-        <el-table-column prop='coordinateX' label='x坐标' width='180'>
+        <el-table-column prop='x' label='x坐标' width='180'>
         </el-table-column>
-        <el-table-column prop='coordinateY' label='y坐标'> </el-table-column>
-        <el-table-column prop='history' label='历史信息'> </el-table-column>
+        <el-table-column prop='y' label='y坐标'> </el-table-column>
+        <el-table-column prop='ask_price' label='最后价格'> </el-table-column>
+        <el-table-column prop='update_time' label='更新时间'> </el-table-column>
       </el-table>
     </div>
   </div>
@@ -26,55 +27,34 @@ export default {
   data () {
     return {
       form: {
-        coordinateX: '',
-        coordinateY: ''
+        x: '',
+        y: ''
       },
-      tableData: [
-        {
-          name: '2016-05-02',
-          coordinateX: '王小虎',
-          coordinateY: '上海市普陀区金沙江路 1518 弄',
-          history: []
-        },
-        {
-          name: '2016-05-04',
-          coordinateX: '王小虎',
-          coordinateY: '上海市普陀区金沙江路 1517 弄',
-          history: []
-        },
-        {
-          name: '2016-05-01',
-          coordinateX: '王小虎',
-          coordinateY: '上海市普陀区金沙江路 1519 弄',
-          history: []
-        },
-        {
-          name: '2016-05-03',
-          coordinateX: '王小虎',
-          coordinateY: '上海市普陀区金沙江路 1516 弄',
-          history: []
-        }
-      ]
+      tableData: [],
+      loading: false
     }
   },
   mounted () {
     this.getData()
   },
   methods: {
-    deleteSite (row) {
-      const type = 'delete'
-      const { name, coordinateX, coordinateY } = row
-      const dataObj = {
-        name, coordinateX, coordinateY, type
-      }
-      console.log(dataObj)
-    },
     getData () {
-      console.log(this.form)
+      this.loading = true
       this.$axios
-        .get('/api/monitor_lands', {})
+        .get('/api/history_prices', {})
         .then(res => {
-          console.log(res)
+          this.tableData = res.data.items || []
+          this.loading = false
+        })
+    },
+    lookData () {
+      const objData = this.form
+      this.loading = true
+      this.$axios
+        .post('/api/history_prices', objData)
+        .then(res => {
+          this.tableData = res.data.items || []
+          this.loading = false
         })
     }
   }

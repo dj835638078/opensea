@@ -46,7 +46,11 @@ export default {
       const dataObj = {
         ...this.form, type: 'add'
       }
-      console.log(dataObj)
+      this.$axios
+        .post('/api/monitor_lands', dataObj)
+        .then(res => {
+          this.$emit('refresh')
+        })
     }
   }
 }
